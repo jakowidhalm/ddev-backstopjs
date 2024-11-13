@@ -1,6 +1,4 @@
 #ddev-generated
-version: '3.7'
-
 services:
   # This is the service name used when running ddev commands accepting the
   # --service flag.
@@ -22,7 +20,7 @@ services:
     init: true
     entrypoint: [ /entrypoint.sh ]
     volumes:
-      - ../tests/backstop:/src
+      - ../tests:/src
       - .:/mnt/ddev_config:ro
     shm_size: 1gb
     environment:

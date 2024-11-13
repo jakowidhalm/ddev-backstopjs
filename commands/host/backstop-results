@@ -1,19 +1,51 @@
 #!/bin/bash
 
-#ddev-generated
+BACKSTOP_JSON=$(find . -name backstop.json)
 
-## Description: Launch a browser with latest backstop results
-## Usage: backstop-results
-## Example: "ddev backstop-results"
+## if no backstop.json files are found, exit
+if [ -z "$BACKSTOP_JSON" ]; then
+  echo "No backstop.json files found"
+  exit 1
+fi
 
-case $OSTYPE in
-  linux-gnu)
-    xdg-open ${DDEV_APPROOT}/tests/backstop/backstop_data/html_report/index.html
-    ;;
-  "darwin"*)
-    open ${DDEV_APPROOT}/tests/backstop/backstop_data/html_report/index.html
-    ;;
-  "win*"* | "msys"*)
-    start ${DDEV_APPROOT}/tests/backstop/backstop_data/html_report/index.html
-    ;;
-esac
+  ## if there is only one backstop.json file, use it
+if [ $(echo $BACKSTOP_JSON | wc -w) -eq 1 ]; then
+  echo "Using backstop.json: $BACKSTOP_JSON"
+
+  case $OSTYPE in
+    linux-gnu)
+      xdg-open $(pwd)/$(dirname $BACKSTOP_JSON)/backstop_data/html_report/index.html
+      ;;
+    "darwin"*)
+      open $(pwd)/$(dirname $BACKSTOP_JSON)/backstop_data/html_report/index.html
+      ;;
+    "win*"* | "msys"*)
+      start $(pwd)}/tests/$(dirname $BACKSTOP_JSON)/backstop_data/html_report/index.html
+      ;;
+  esac
+
+  exit 0
+fi
+
+## make on BACKSTOP_JSON file selectable
+PS3="Select backstop.json file: "
+select file in $BACKSTOP_JSON; do
+  echo "Using backstop.json: $file"
+
+  case $OSTYPE in
+    linux-gnu)
+      xdg-open $(pwd)/$(dirname $file)/backstop_data/html_report/index.html
+      ;;
+    "darwin"*)
+      open $(pwd)/$(dirname $file)/backstop_data/html_report/index.html
+      ;;
+    "win*"* | "msys"*)
+      start $(pwd)}/tests/$(dirname $file)/backstop_data/html_report/index.html
+      ;;
+  esac
+
+
+done
+
+exit 0
+
