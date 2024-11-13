@@ -14,37 +14,52 @@ fi
 
 
 ## if parameter "test" or "reference" is passed, we need to find all backstop.json files
-if [ "$1" == "test" ] ||  [ "$1" == "reference" ]; then
-  BACKSTOP_JSON=$(find . -name backstop.json)
 
-  ## if no backstop.json files are found, exit
-  if [ -z "$BACKSTOP_JSON" ]; then
-    echo "No backstop.json files found"
-    exit 1
-  fi
+BACKSTOP_JSON=$(find . -name backstop.json)
 
-  ## if there is only one backstop.json file, use it
-  if [ $(echo $BACKSTOP_JSON | wc -w) -eq 1 ]; then
-    echo "Using backstop.json: $BACKSTOP_JSON"
-    cd $(dirname $BACKSTOP_JSON)
-    echo "Running backstop test in $(dirname $BACKSTOP_JSON)"
+## if no backstop.json files are found, exit
+if [ -z "$BACKSTOP_JSON" ]; then
+  echo "No backstop.json files found"
+  exit 1
+fi
+
+## if there is only one backstop.json file, use it
+if [ $(echo $BACKSTOP_JSON | wc -w) -eq 1 ]; then
+  echo "Using backstop.json: $BACKSTOP_JSON"
+  cd $(dirname $BACKSTOP_JSON)
+  echo "Running backstop test in $(dirname $BACKSTOP_JSON)"
+  if [ "$1" == "test" ] ||  [ "$1" == "reference" ]; then
     NODE_PATH="/usr/local/lib/node_modules/" backstop $1
     exit 0
   fi
+  if [ "$1" == "all" ]; then
+    NODE_PATH="/usr/local/lib/node_modules/" backstop reference && NODE_PATH="/usr/local/lib/node_modules/" backstop test
+    exit 0
+  fi
 
-  ## make on BACKSTOP_JSON file selectable
-  PS3="Select backstop.json file: "
-  select file in $BACKSTOP_JSON; do
-    echo "Using backstop.json: $file"
 
-    ## cd to folder where backstop.json is located
-    cd $(dirname $file)
-    echo "Running backstop reference in $(dirname $file)"
-
-    NODE_PATH="/usr/local/lib/node_modules/" backstop $1
-    break
-  done
-
+  exit 0
 fi
+
+## make on BACKSTOP_JSON file selectable
+PS3="Select backstop.json file: "
+select file in $BACKSTOP_JSON; do
+  echo "Using backstop.json: $file"
+
+  ## cd to folder where backstop.json is located
+  cd $(dirname $file)
+  echo "Running backstop reference in $(dirname $file)"
+
+  if [ "$1" == "test" ] ||  [ "$1" == "reference" ]; then
+    NODE_PATH="/usr/local/lib/node_modules/" backstop $1
+    exit 0
+  fi
+  if [ "$1" == "all" ]; then
+    NODE_PATH="/usr/local/lib/node_modules/" backstop reference && NODE_PATH="/usr/local/lib/node_modules/" backstop test
+    exit 0
+  fi
+  break
+done
+
 
 exit 0
